@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文字数カウンター</title>
+    <meta name="description" content="リアルタイムで文字数、行数、段落数をカウントするシンプルなWebアプリケーション">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1>文字数カウンター</h1>
+            <p class="app-description">テキストを入力してリアルタイムで統計情報を確認できます</p>
+        </header>
+
+        <main class="app-main">
+            <!-- テキスト入力エリア -->
+            <section class="input-section">
+                <!-- 操作ボタン -->
+                <div class="input-actions" aria-label="操作ボタン">
+                    <div class="input-button-group">
+                        <button type="button" id="clear-button" class="input-action-button clear-button"
+                            aria-describedby="clear-help" title="テキストを削除して統計をリセットします">
+                            <span class="button-icon" aria-hidden="true">🗑️</span>
+                            クリア
+                        </button>
+
+                        <button type="button" id="copy-button" class="input-action-button copy-button"
+                            aria-describedby="copy-help" title="テキストをクリップボードにコピーします">
+                            <span class="button-icon" aria-hidden="true">📋</span>
+                            コピー
+                        </button>
+                    </div>
+                </div>
+
+                <label for="text-input" class="visually-hidden">テキスト入力エリア</label>
+                <textarea id="text-input" class="text-input" placeholder="ここにテキストを入力してください..." rows="10"
+                    aria-describedby="input-help"></textarea>
+                <div id="input-help" class="input-help">
+                    入力したテキストの統計情報がリアルタイムで表示されます
+                </div>
+            </section>
+
+            <!-- 統計表示パネル -->
+            <section class="stats-section" aria-label="テキスト統計情報">
+                <h2 class="stats-title">統計情報</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">文字数（スペース含む）</span>
+                        <span class="stat-value" id="chars-with-spaces" aria-live="polite">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">文字数（スペース除く）</span>
+                        <span class="stat-value" id="chars-without-spaces" aria-live="polite">0</span>
+                    </div>
+
+                    <div class="stat-item">
+                        <span class="stat-label">行数</span>
+                        <span class="stat-value" id="line-count" aria-live="polite">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">段落数</span>
+                        <span class="stat-value" id="paragraph-count" aria-live="polite">0</span>
+                    </div>
+                </div>
+            </section>
+
+
+
+            <!-- フィードバック表示エリア -->
+            <div id="feedback" class="feedback" role="status" aria-live="polite" aria-atomic="true"></div>
+        </main>
+
+        <footer class="app-footer">
+            <p>&copy; 2025 文字数カウンター</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

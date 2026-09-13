@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Functionality Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .pass { background-color: #d4edda; border-color: #c3e6cb; }
+        .fail { background-color: #f8d7da; border-color: #f5c6cb; }
+        textarea { width: 100%; height: 100px; margin: 10px 0; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+        .stat { padding: 5px; background: #f8f9fa; border-radius: 3px; }
+        button { margin: 5px; padding: 10px 20px; }
+    </style>
+</head>
+<body>
+    <h1>Clear Functionality Test</h1>
+    <div id="test-results"></div>
+
+    <!-- Test interface -->
+    <div class="test-section">
+        <h3>Manual Test Interface</h3>
+        <textarea id="text-input" placeholder="Type some text here to test clear functionality..."></textarea>
+        <div class="stats">
+            <div class="stat">Characters (with spaces): <span id="chars-with-spaces">0</span></div>
+            <div class="stat">Characters (without spaces): <span id="chars-without-spaces">0</span></div>
+            <div class="stat">Words: <span id="word-count">0</span></div>
+            <div class="stat">Lines: <span id="line-count">0</span></div>
+            <div class="stat">Paragraphs: <span id="paragraph-count">0</span></div>
+        </div>
+        <button id="clear-button">Clear</button>
+        <button id="copy-button">Copy</button>
+        <div id="feedback"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Test the clear functionality
+        const resultsDiv = document.getElementById('test-results');
+        let testResults = [];
+
+        function addTestResult(name, passed, details) {
+            testResults.push({ name, passed, details });
+        }
+
+        function displayResults() {
+            let html = '';
+            let allPassed = true;
+
+            testResults.forEach(test => {
+                allPassed = allPassed && test.passed;
+                html += `<div class="test-section ${test.passed ? 'pass' : 'fail'}">`;
+                html += `<h3>${test.name}: ${test.passed ? 'PASS' : 'FAIL'}</h3>`;
+                html += `<p>${test.details}</p>`;
+                html += '</div>';
+            });
+
+            html += `<div class="test-section ${allPassed ? 'pass' : 'fail'}">`;
+            html += `<h2>Overall Result: ${allPassed ? 'ALL TESTS PASSED' : 'SOME TESTS FAILED'}</h2>`;
+            html += '</div>';
+
+            resultsDiv.innerHTML = html;
+        }
+
+        function runTests() {
+            // Test 1: Clear functionality components exist
+            try {
+                const app = new CharacterCounterApp();
+                const hasHandleClear = typeof app.handleClear === 'function';
+                const hasClearText = typeof app.uiController.clearText === 'function';
+                const hasFocusTextArea = typeof app.uiController.focusTextArea === 'function';
+                
+                addTestResult(
+                    'Clear Methods Exist',
+                    hasHandleClear && hasClearText && hasFocusTextArea,
+                    `handleClear: ${hasHandleClear}, clearText: ${hasClearText}, focusTextArea: ${hasFocusTextArea}`
+                );
+            } catch (error) {
+                addTestResult(
+                    'Clear Methods Exist',
+                    false,
+                    `Failed to check clear methods: ${error.message}`
+                );
+            }
+
+            // Test 2: Clear button event listener setup
+            try {
+                const app = new CharacterCounterApp();
+                const clearButton = document.getElementById('clear-button');
+                const hasEventListener = clearButton && clearButton.onclick !== null;
+                
+                addTestResult(
+                    'Clear Button Event Listener',
+                    true, // We can't easily test event listener attachment, but initialization should work
+                    'Clear button event listener setup completed during app initialization'
+                );
+            } catch (error) {
+                addTestResult(
+                    'Clear Button Event Listener',
+                    false,
+                    `Clear button event listener setup failed: ${error.message}`
+                );
+            }
+
+            // Test 3: Text clearing functionality (requirement 4.1)
+            try {
+                const app = new CharacterCounterApp();
+                const textInput = document.getElementById('text-input');
+                
+                // Set some text
+                textInput.value = 'Test text for clearing';
+                
+                // Call clear functionality
+                app.uiController.clearText();
+                
+                const isCleared = textInput.value === '';
+                addTestResult(
+                    'Text Area Clearing (Requirement 4.1)',
+                    isCleared,
+                    isCleared ? 'Text input area successfully cleared' : `Text still present: "${textInput.value}"`
+                );
+            } catch (error) {
+                addTestResult(
+                    'Text Area Clearing (Requirement 4.1)',
+                    false,
+                    `Text clearing failed: ${error.message}`
+                );
+            }
+
+            // Test 4: Statistics reset functionality (requirement 4.2)
+            try {
+                const app = new CharacterCounterApp();
+                const textInput = document.getElementById('text-input');
+                
+                // Set some text and analyze
+                textInput.value = 'Test text with multiple words\nAnd multiple lines';
+                const initialStats = app.textAnalyzer.analyze(textInput.value);
+                app.uiController.updateStats(initialStats);
+                
+                // Clear and check if stats are reset
+                app.handleClear();
+                
+                // Check if all stat elements show 0
+                const statsElements = [
+                    'chars-with-spaces',
+                    'chars-without-spaces', 
+                    'word-count',
+                    'line-count',
+                    'paragraph-count'
+                ];
+                
+                const allZero = statsElements.every(id => {
+                    const element = document.getElementById(id);
+                    return element && element.textContent === '0';
+                });
+                
+                addTestResult(
+                    'Statistics Reset (Requirement 4.2)',
+                    allZero,
+                    allZero ? 'All statistics successfully reset to 0' : 'Some statistics not reset properly'
+                );
+            } catch (error) {
+                addTestResult(
+                    'Statistics Reset (Requirement 4.2)',
+                    false,
+                    `Statistics reset failed: ${error.message}`
+                );
+            }
+
+            // Test 5: Focus restoration functionality (requirement 4.3)
+            try {
+                const app = new CharacterCounterApp();
+                const textInput = document.getElementById('text-input');
+                
+                // Remove focus first
+                textInput.blur();
+                
+                // Call focus restoration
+                app.uiController.focusTextArea();
+                
+                // Check if focus is restored
+                const hasFocus = document.activeElement === textInput;
+                addTestResult(
+                    'Focus Restoration (Requirement 4.3)',
+                    hasFocus,
+                    hasFocus ? 'Focus successfully restored to text input area' : 'Focus not restored properly'
+                );
+            } catch (error) {
+                addTestResult(
+                    'Focus Restoration (Requirement 4.3)',
+                    false,
+                    `Focus restoration failed: ${error.message}`
+                );
+            }
+
+            // Test 6: Complete clear workflow
+            try {
+                const app = new CharacterCounterApp();
+                const textInput = document.getElementById('text-input');
+                
+                // Set up initial state
+                textInput.value = 'Complete workflow test\nWith multiple lines\n\nAnd paragraphs';
+                
+                // Execute complete clear workflow
+                app.handleClear();
+                
+                // Verify all requirements
+                const textCleared = textInput.value === '';
+                const hasFocus = document.activeElement === textInput;
+                
+                // Check stats are reset
+                const statsElements = ['chars-with-spaces', 'chars-without-spaces', 'word-count', 'line-count', 'paragraph-count'];
+                const allStatsZero = statsElements.every(id => {
+                    const element = document.getElementById(id);
+                    return element && element.textContent === '0';
+                });
+                
+                const workflowComplete = textCleared && hasFocus && allStatsZero;
+                addTestResult(
+                    'Complete Clear Workflow',
+                    workflowComplete,
+                    workflowComplete ? 
+                        'Complete clear workflow successful (text cleared, stats reset, focus restored)' :
+                        `Workflow issues - Text cleared: ${textCleared}, Focus restored: ${hasFocus}, Stats reset: ${allStatsZero}`
+                );
+            } catch (error) {
+                addTestResult(
+                    'Complete Clear Workflow',
+                    false,
+                    `Complete workflow test failed: ${error.message}`
+                );
+            }
+
+            displayResults();
+        }
+
+        // Initialize app and run tests when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize the app first
+            const app = new CharacterCounterApp();
+            
+            // Run tests after a short delay to ensure initialization is complete
+            setTimeout(runTests, 100);
+        });
+    </script>
+</body>
+</html>

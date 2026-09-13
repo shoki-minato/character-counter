@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Counter - Performance Test</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .performance-test {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        
+        .test-results {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        
+        .test-button {
+            margin: 5px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .test-button:hover {
+            background-color: #0056b3;
+        }
+        
+        .performance-stats {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>文字数カウンター - パフォーマンステスト</h1>
+        </header>
+
+        <main>
+            <!-- Original character counter interface -->
+            <div class="input-section">
+                <label for="text-input">テキストを入力してください:</label>
+                <textarea 
+                    id="text-input" 
+                    placeholder="ここにテキストを入力すると、リアルタイムで文字数などの統計情報が表示されます..."
+                    rows="10"
+                ></textarea>
+            </div>
+
+            <div class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">文字数（スペース含む）:</span>
+                        <span id="chars-with-spaces" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">文字数（スペース除く）:</span>
+                        <span id="chars-without-spaces" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">単語数:</span>
+                        <span id="word-count" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">行数:</span>
+                        <span id="line-count" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">段落数:</span>
+                        <span id="paragraph-count" class="stat-value">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions-section">
+                <button id="clear-button" class="action-button">クリア</button>
+                <button id="copy-button" class="action-button">コピー</button>
+            </div>
+
+            <!-- Performance testing section -->
+            <div class="performance-test">
+                <h2>パフォーマンステスト</h2>
+                <p>様々なサイズのテキストでパフォーマンスをテストします。</p>
+                
+                <div class="test-controls">
+                    <button class="test-button" onclick="runPerformanceTest(1000)">小サイズテスト (1K文字)</button>
+                    <button class="test-button" onclick="runPerformanceTest(10000)">中サイズテスト (10K文字)</button>
+                    <button class="test-button" onclick="runPerformanceTest(50000)">大サイズテスト (50K文字)</button>
+                    <button class="test-button" onclick="runPerformanceTest(100000)">超大サイズテスト (100K文字)</button>
+                </div>
+                
+                <div class="test-controls">
+                    <button class="test-button" onclick="showPerformanceStats()">パフォーマンス統計表示</button>
+                    <button class="test-button" onclick="clearCache()">キャッシュクリア</button>
+                    <button class="test-button" onclick="performMemoryCleanup()">メモリクリーンアップ</button>
+                </div>
+                
+                <div id="test-results" class="test-results"></div>
+                
+                <div id="performance-stats" class="performance-stats" style="display: none;"></div>
+            </div>
+
+            <div id="feedback" class="feedback"></div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Performance testing functions
+        function runPerformanceTest(size) {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.textContent = `テスト実行中... (${size}文字)`;
+            
+            // Use setTimeout to allow UI update
+            setTimeout(() => {
+                const result = window.performanceTest(size);
+                
+                const resultText = `
+パフォーマンステスト結果 (${size}文字):
+- 平均解析時間: ${result.averageTime.toFixed(2)}ms
+- 総実行時間: ${result.totalTime.toFixed(2)}ms
+- キャッシュヒット率: ${result.performanceStats.textAnalyzer.cacheHitRate}
+- 総解析回数: ${result.performanceStats.textAnalyzer.totalAnalyses}
+- メモリ使用量: ${result.performanceStats.memory.used || 'N/A'}
+                `;
+                
+                resultsDiv.textContent = resultText;
+                
+                // Performance evaluation
+                let evaluation = '';
+                if (result.averageTime < 10) {
+                    evaluation = '✅ 優秀 - 非常に高速';
+                } else if (result.averageTime < 50) {
+                    evaluation = '✅ 良好 - 要件を満たしています';
+                } else if (result.averageTime < 100) {
+                    evaluation = '⚠️ 注意 - やや遅い';
+                } else {
+                    evaluation = '❌ 問題 - 最適化が必要';
+                }
+                
+                resultsDiv.textContent += `\n\n評価: ${evaluation}`;
+            }, 100);
+        }
+        
+        function showPerformanceStats() {
+            const statsDiv = document.getElementById('performance-stats');
+            const stats = window.getPerformanceStats();
+            
+            const statsText = `
+アプリケーションパフォーマンス統計:
+- 稼働時間: ${stats.uptime}
+- 総解析回数: ${stats.textAnalyzer.totalAnalyses}
+- キャッシュヒット率: ${stats.textAnalyzer.cacheHitRate}
+- 平均処理時間: ${stats.textAnalyzer.averageProcessingTime.toFixed(2)}ms
+- キャッシュサイズ: ${stats.textAnalyzer.cacheSize}
+- メモリ使用量: ${typeof stats.memory === 'object' ? stats.memory.used : stats.memory}
+            `;
+            
+            statsDiv.textContent = statsText;
+            statsDiv.style.display = 'block';
+        }
+        
+        function clearCache() {
+            window.clearAnalyzerCache();
+            document.getElementById('test-results').textContent = 'キャッシュをクリアしました。';
+        }
+        
+        function performMemoryCleanup() {
+            window.performMemoryCleanup();
+            document.getElementById('test-results').textContent = 'メモリクリーンアップを実行しました。';
+        }
+        
+        // Load test with large text
+        function loadLargeTextTest() {
+            const textarea = document.getElementById('text-input');
+            const largeText = 'これは大量のテキストのテストです。'.repeat(1000);
+            textarea.value = largeText;
+            
+            // Trigger input event
+            const event = new Event('input', { bubbles: true });
+            textarea.dispatchEvent(event);
+        }
+        
+        // Add load test button
+        document.addEventListener('DOMContentLoaded', () => {
+            const testControls = document.querySelector('.test-controls');
+            const loadTestButton = document.createElement('button');
+            loadTestButton.className = 'test-button';
+            loadTestButton.textContent = '大量テキスト読み込みテスト';
+            loadTestButton.onclick = loadLargeTextTest;
+            testControls.appendChild(loadTestButton);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Clear Test</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Clear Functionality Test</h1>
+        
+        <div class="test-instructions">
+            <h2>Test Instructions:</h2>
+            <ol>
+                <li>Type some text in the textarea below</li>
+                <li>Observe that statistics update in real-time</li>
+                <li>Click the "Clear" button</li>
+                <li>Verify that:
+                    <ul>
+                        <li>Text area is empty (Requirement 4.1)</li>
+                        <li>All statistics show 0 (Requirement 4.2)</li>
+                        <li>Focus returns to text area (Requirement 4.3)</li>
+                        <li>Success feedback is shown</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <main class="app-main">
+            <!-- テキスト入力エリア -->
+            <section class="input-section">
+                <label for="text-input" class="visually-hidden">テキスト入力エリア</label>
+                <textarea 
+                    id="text-input" 
+                    class="text-input" 
+                    placeholder="ここにテキストを入力してください..."
+                    rows="10"
+                    aria-describedby="input-help"
+                ></textarea>
+                <div id="input-help" class="input-help">
+                    入力したテキストの統計情報がリアルタイムで表示されます
+                </div>
+            </section>
+
+            <!-- 統計表示パネル -->
+            <section class="stats-section" aria-label="テキスト統計情報">
+                <h2 class="stats-title">統計情報</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">文字数（スペース含む）</span>
+                        <span class="stat-value" id="chars-with-spaces" aria-live="polite">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">文字数（スペース除く）</span>
+                        <span class="stat-value" id="chars-without-spaces" aria-live="polite">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">単語数</span>
+                        <span class="stat-value" id="word-count" aria-live="polite">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">行数</span>
+                        <span class="stat-value" id="line-count" aria-live="polite">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">段落数</span>
+                        <span class="stat-value" id="paragraph-count" aria-live="polite">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 操作ボタン -->
+            <section class="actions-section" aria-label="操作ボタン">
+                <div class="button-group">
+                    <button 
+                        type="button" 
+                        id="clear-button" 
+                        class="action-button clear-button"
+                        aria-describedby="clear-help"
+                    >
+                        <span class="button-icon" aria-hidden="true">🗑️</span>
+                        クリア
+                    </button>
+                    <div id="clear-help" class="button-help">
+                        テキストを削除して統計をリセットします
+                    </div>
+                    
+                    <button 
+                        type="button" 
+                        id="copy-button" 
+                        class="action-button copy-button"
+                        aria-describedby="copy-help"
+                    >
+                        <span class="button-icon" aria-hidden="true">📋</span>
+                        コピー
+                    </button>
+                    <div id="copy-help" class="button-help">
+                        テキストをクリップボードにコピーします
+                    </div>
+                </div>
+            </section>
+
+            <!-- フィードバック表示エリア -->
+            <div id="feedback" class="feedback" role="status" aria-live="polite" aria-atomic="true"></div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    
+    <script>
+        // Add some debugging to verify clear functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const clearButton = document.getElementById('clear-button');
+            const textInput = document.getElementById('text-input');
+            
+            console.log('Clear test page loaded');
+            console.log('Clear button:', clearButton);
+            console.log('Text input:', textInput);
+            
+            // Add click listener to log clear operations
+            if (clearButton) {
+                clearButton.addEventListener('click', () => {
+                    console.log('Clear button clicked');
+                    console.log('Text before clear:', textInput.value);
+                    
+                    // Check after a short delay to see the result
+                    setTimeout(() => {
+                        console.log('Text after clear:', textInput.value);
+                        console.log('Active element:', document.activeElement);
+                        console.log('Focus on text input:', document.activeElement === textInput);
+                        
+                        // Check statistics
+                        const stats = [
+                            'chars-with-spaces',
+                            'chars-without-spaces', 
+                            'word-count',
+                            'line-count',
+                            'paragraph-count'
+                        ];
+                        
+                        stats.forEach(id => {
+                            const element = document.getElementById(id);
+                            console.log(`${id}:`, element ? element.textContent : 'not found');
+                        });
+                    }, 100);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

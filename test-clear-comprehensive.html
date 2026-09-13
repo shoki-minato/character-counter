@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Clear Functionality Test</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .test-results {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .test-pass { border-color: #28a745; background-color: #d4edda; }
+        .test-fail { border-color: #dc3545; background-color: #f8d7da; }
+        .test-item {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: white;
+        }
+        .test-item.pass { border-left: 4px solid #28a745; }
+        .test-item.fail { border-left: 4px solid #dc3545; }
+        .keyboard-shortcut {
+            background-color: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1>Clear Functionality Test</h1>
+            <p class="app-description">Comprehensive testing of clear functionality (Requirements 4.1, 4.2, 4.3)</p>
+        </header>
+
+        <div class="test-results" id="test-results">
+            <h2>Test Results</h2>
+            <div id="test-output">Running tests...</div>
+        </div>
+
+        <div class="test-instructions">
+            <h2>Manual Testing Instructions:</h2>
+            <ol>
+                <li>Type some text with multiple lines and paragraphs in the textarea below</li>
+                <li>Observe that statistics update in real-time</li>
+                <li>Click the "Clear" button OR use keyboard shortcut <span class="keyboard-shortcut">Ctrl+L</span> (or <span class="keyboard-shortcut">Cmd+L</span> on Mac)</li>
+                <li>Verify all requirements are met (see test results above)</li>
+            </ol>
+        </div>
+
+        <main class="app-main">
+            <!-- テキスト入力エリア -->
+            <section class="input-section">
+                <label for="text-input" class="visually-hidden">テキスト入力エリア</label>
+                <textarea 
+                    id="text-input" 
+                    class="text-input" 
+                    placeholder="ここにテキストを入力してください..."
+                    rows="10"
+                    aria-describedby="input-help"
+                ></textarea>
+                <div id="input-help" class="input-help">
+                    入力したテキストの統計情報がリアルタイムで表示されます
+                </div>
+            </section>
+
+            <!-- 統計表示パネル -->
+            <section class="stats-section" aria-label="テキスト統計情報">
+                <h2 class="stats-title">統計情報</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">文字数（スペース含む）</span>
+                        <span class="stat-value" id="chars-with-spaces" aria-live="polite">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">文字数（スペース除く）</span>
+                        <span class="stat-value" id="chars-without-spaces" aria-live="polite">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">単語数</span>
+                        <span class="stat-value" id="word-count" aria-live="polite">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">行数</span>
+                        <span class="stat-value" id="line-count" aria-live="polite">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">段落数</span>
+                        <span class="stat-value" id="paragraph-count" aria-live="polite">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 操作ボタン -->
+            <section class="actions-section" aria-label="操作ボタン">
+                <div class="button-group">
+                    <button 
+                        type="button" 
+                        id="clear-button" 
+                        class="action-button clear-button"
+                        aria-describedby="clear-help"
+                    >
+                        <span class="button-icon" aria-hidden="true">🗑️</span>
+                        クリア
+                    </button>
+                    <div id="clear-help" class="button-help">
+                        テキストを削除して統計をリセットします (Ctrl+L)
+                    </div>
+                    
+                    <button 
+                        type="button" 
+                        id="copy-button" 
+                        class="action-button copy-button"
+                        aria-describedby="copy-help"
+                    >
+                        <span class="button-icon" aria-hidden="true">📋</span>
+                        コピー
+                    </button>
+                    <div id="copy-help" class="button-help">
+                        テキストをクリップボードにコピーします
+                    </div>
+                </div>
+            </section>
+
+            <!-- フィードバック表示エリア -->
+            <div id="feedback" class="feedback" role="status" aria-live="polite" aria-atomic="true"></div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    
+    <script>
+        let app;
+        let testResults = [];
+
+        function addTestResult(name, passed, details) {
+            testResults.push({ name, passed, details });
+        }
+
+        function displayTestResults() {
+            const testOutput = document.getElementById('test-output');
+            const testResultsContainer = document.getElementById('test-results');
+            
+            let html = '';
+            let allPassed = true;
+
+            testResults.forEach(test => {
+                allPassed = allPassed && test.passed;
+                html += `<div class="test-item ${test.passed ? 'pass' : 'fail'}">`;
+                html += `<strong>${test.name}:</strong> ${test.passed ? '✅ PASS' : '❌ FAIL'}<br>`;
+                html += `<small>${test.details}</small>`;
+                html += '</div>';
+            });
+
+            html += `<div class="test-item ${allPassed ? 'pass' : 'fail'}">`;
+            html += `<strong>Overall Result:</strong> ${allPassed ? '✅ ALL TESTS PASSED' : '❌ SOME TESTS FAILED'}`;
+            html += '</div>';
+
+            testOutput.innerHTML = html;
+            testResultsContainer.className = `test-results ${allPassed ? 'test-pass' : 'test-fail'}`;
+        }
+
+        function runComprehensiveTests() {
+            // Test 1: Component initialization
+            try {
+                const hasHandleClear = typeof app.handleClear === 'function';
+                const hasClearText = typeof app.uiController.clearText === 'function';
+                const hasFocusTextArea = typeof app.uiController.focusTextArea === 'function';
+                
+                addTestResult(
+                    'Clear Methods Available',
+                    hasHandleClear && hasClearText && hasFocusTextArea,
+                    `handleClear: ${hasHandleClear}, clearText: ${hasClearText}, focusTextArea: ${hasFocusTextArea}`
+                );
+            } catch (error) {
+                addTestResult('Clear Methods Available', false, `Error: ${error.message}`);
+            }
+
+            // Test 2: Requirement 4.1 - Text clearing
+            try {
+                const textInput = document.getElementById('text-input');
+                textInput.value = 'Test text for requirement 4.1';
+                
+                app.uiController.clearText();
+                
+                const textCleared = textInput.value === '';
+                addTestResult(
+                    'Requirement 4.1 - Text Input Clearing',
+                    textCleared,
+                    textCleared ? 'Text input area successfully cleared' : `Text still present: "${textInput.value}"`
+                );
+            } catch (error) {
+                addTestResult('Requirement 4.1 - Text Input Clearing', false, `Error: ${error.message}`);
+            }
+
+            // Test 3: Requirement 4.2 - Statistics reset
+            try {
+                const textInput = document.getElementById('text-input');
+                textInput.value = 'Multi-line text\nWith several words\n\nAnd multiple paragraphs';
+                
+                // Trigger analysis
+                const stats = app.textAnalyzer.analyze(textInput.value);
+                app.uiController.updateStats(stats);
+                
+                // Clear and check
+                app.uiController.clearText();
+                const emptyStats = app.textAnalyzer.analyze('');
+                app.uiController.updateStats(emptyStats);
+                
+                // Verify all stats are 0
+                const statsElements = [
+                    'chars-with-spaces',
+                    'chars-without-spaces', 
+                    'word-count',
+                    'line-count',
+                    'paragraph-count'
+                ];
+                
+                const allZero = statsElements.every(id => {
+                    const element = document.getElementById(id);
+                    return element && element.textContent === '0';
+                });
+                
+                addTestResult(
+                    'Requirement 4.2 - Statistics Reset',
+                    allZero,
+                    allZero ? 'All statistics successfully reset to 0' : 'Some statistics not reset properly'
+                );
+            } catch (error) {
+                addTestResult('Requirement 4.2 - Statistics Reset', false, `Error: ${error.message}`);
+            }
+
+            // Test 4: Requirement 4.3 - Focus restoration
+            try {
+                const textInput = document.getElementById('text-input');
+                
+                // Remove focus
+                textInput.blur();
+                document.body.focus();
+                
+                // Call focus restoration
+                app.uiController.focusTextArea();
+                
+                // Check focus after a delay (due to setTimeout in implementation)
+                setTimeout(() => {
+                    const hasFocus = document.activeElement === textInput;
+                    addTestResult(
+                        'Requirement 4.3 - Focus Restoration',
+                        hasFocus,
+                        hasFocus ? 'Focus successfully restored to text input area' : 'Focus not restored properly'
+                    );
+                    
+                    // Test 5: Complete workflow
+                    testCompleteWorkflow();
+                }, 50);
+            } catch (error) {
+                addTestResult('Requirement 4.3 - Focus Restoration', false, `Error: ${error.message}`);
+                testCompleteWorkflow();
+            }
+        }
+
+        function testCompleteWorkflow() {
+            try {
+                const textInput = document.getElementById('text-input');
+                
+                // Set up test data
+                textInput.value = 'Complete workflow test\nWith multiple lines\n\nAnd multiple paragraphs\nTo verify all requirements';
+                
+                // Execute complete clear workflow
+                app.handleClear();
+                
+                // Check all requirements after a delay
+                setTimeout(() => {
+                    const textCleared = textInput.value === '';
+                    const hasFocus = document.activeElement === textInput;
+                    
+                    // Check stats are reset
+                    const statsElements = ['chars-with-spaces', 'chars-without-spaces', 'word-count', 'line-count', 'paragraph-count'];
+                    const allStatsZero = statsElements.every(id => {
+                        const element = document.getElementById(id);
+                        return element && element.textContent === '0';
+                    });
+                    
+                    const workflowComplete = textCleared && hasFocus && allStatsZero;
+                    addTestResult(
+                        'Complete Clear Workflow',
+                        workflowComplete,
+                        workflowComplete ? 
+                            'Complete clear workflow successful (all requirements met)' :
+                            `Issues found - Text cleared: ${textCleared}, Focus restored: ${hasFocus}, Stats reset: ${allStatsZero}`
+                    );
+                    
+                    // Test keyboard shortcut
+                    testKeyboardShortcut();
+                }, 100);
+            } catch (error) {
+                addTestResult('Complete Clear Workflow', false, `Error: ${error.message}`);
+                testKeyboardShortcut();
+            }
+        }
+
+        function testKeyboardShortcut() {
+            try {
+                const textInput = document.getElementById('text-input');
+                textInput.value = 'Testing keyboard shortcut';
+                
+                // Simulate Ctrl+L keypress
+                const keyEvent = new KeyboardEvent('keydown', {
+                    key: 'l',
+                    ctrlKey: true,
+                    bubbles: true,
+                    cancelable: true
+                });
+                
+                document.dispatchEvent(keyEvent);
+                
+                // Check result after delay
+                setTimeout(() => {
+                    const shortcutWorked = textInput.value === '';
+                    addTestResult(
+                        'Keyboard Shortcut (Ctrl+L)',
+                        shortcutWorked,
+                        shortcutWorked ? 'Keyboard shortcut successfully clears text' : 'Keyboard shortcut not working'
+                    );
+                    
+                    displayTestResults();
+                }, 100);
+            } catch (error) {
+                addTestResult('Keyboard Shortcut (Ctrl+L)', false, `Error: ${error.message}`);
+                displayTestResults();
+            }
+        }
+
+        // Initialize and run tests
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                app = new CharacterCounterApp();
+                console.log('App initialized successfully');
+                
+                // Run tests after initialization
+                setTimeout(runComprehensiveTests, 200);
+            } catch (error) {
+                console.error('App initialization failed:', error);
+                addTestResult('App Initialization', false, `Failed to initialize app: ${error.message}`);
+                displayTestResults();
+            }
+        });
+    </script>
+</body>
+</html>

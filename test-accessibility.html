@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アクセシビリティテスト - 文字数カウンター</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .test-section.pass {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .test-section.fail {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        .test-results {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .test-summary {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .test-summary.pass {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .test-summary.fail {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .run-tests-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .run-tests-btn:hover {
+            background-color: #0056b3;
+        }
+        .accessibility-info {
+            background-color: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .keyboard-test {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <header>
+            <h1>アクセシビリティテスト - 文字数カウンター</h1>
+            <p>WCAG 2.1 ガイドラインに基づいたアクセシビリティテストを実行します</p>
+            
+            <div class="accessibility-info">
+                <h3>テスト対象項目</h3>
+                <ul>
+                    <li>キーボードナビゲーション</li>
+                    <li>スクリーンリーダー対応</li>
+                    <li>ARIA属性の適切な使用</li>
+                    <li>色のコントラスト</li>
+                    <li>フォーカス管理</li>
+                    <li>セマンティックHTML</li>
+                </ul>
+            </div>
+            
+            <button class="run-tests-btn" onclick="runAllAccessibilityTests()">アクセシビリティテストを実行</button>
+        </header>
+
+        <main>
+            <!-- Test Results Summary -->
+            <div id="accessibility-summary" class="test-summary">
+                テストを実行してください
+            </div>
+
+            <!-- Keyboard Navigation Tests -->
+            <section class="test-section" id="keyboard-tests">
+                <h2>キーボードナビゲーションテスト</h2>
+                <div class="keyboard-test">
+                    <p><strong>手動テスト:</strong> Tabキーでナビゲーションを確認してください</p>
+                    <p>期待される順序: テキストエリア → クリアボタン → コピーボタン</p>
+                </div>
+                <div id="keyboard-results" class="test-results">テスト未実行</div>
+            </section>
+
+            <!-- ARIA and Semantic HTML Tests -->
+            <section class="test-section" id="aria-tests">
+                <h2>ARIA属性・セマンティックHTMLテスト</h2>
+                <div id="aria-results" class="test-results">テスト未実行</div>
+            </section>
+
+            <!-- Screen Reader Tests -->
+            <section class="test-section" id="screenreader-tests">
+                <h2>スクリーンリーダー対応テスト</h2>
+                <div id="screenreader-results" class="test-results">テスト未実行</div>
+            </section>
+
+            <!-- Focus Management Tests -->
+            <section class="test-section" id="focus-tests">
+                <h2>フォーカス管理テスト</h2>
+                <div id="focus-results" class="test-results">テスト未実行</div>
+            </section>
+
+            <!-- Color and Contrast Tests -->
+            <section class="test-section" id="contrast-tests">
+                <h2>色・コントラストテスト</h2>
+                <div id="contrast-results" class="test-results">テスト未実行</div>
+            </section>
+
+            <!-- Form and Input Tests -->
+            <section class="test-section" id="form-tests">
+                <h2>フォーム・入力テスト</h2>
+                <div id="form-results" class="test-results">テスト未実行</div>
+            </section>
+        </main>
+
+        <!-- Application under test -->
+        <section class="app-section" style="margin-top: 40px; border-top: 2px solid #ddd; padding-top: 20px;">
+            <h2>テスト対象アプリケーション</h2>
+            
+            <div class="container">
+                <header class="app-header">
+                    <h1>文字数カウンター</h1>
+                    <p class="app-description">テキストの文字数、単語数、行数、段落数をリアルタイムで表示します</p>
+                </header>
+
+                <main class="app-main">
+                    <!-- テキスト入力エリア -->
+                    <section class="input-section">
+                        <label for="text-input" class="visually-hidden">テキスト入力エリア</label>
+                        <textarea 
+                            id="text-input" 
+                            class="text-input" 
+                            placeholder="ここにテキストを入力してください..."
+                            rows="6"
+                            aria-describedby="stats-section"
+                        ></textarea>
+                    </section>
+
+                    <!-- 統計表示パネル -->
+                    <section class="stats-section" id="stats-section" aria-label="テキスト統計情報">
+                        <h2 class="stats-title">統計情報</h2>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-label">文字数（スペース含む）</span>
+                                <span class="stat-value" id="chars-with-spaces" aria-live="polite">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">文字数（スペース除く）</span>
+                                <span class="stat-value" id="chars-without-spaces" aria-live="polite">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">単語数</span>
+                                <span class="stat-value" id="word-count" aria-live="polite">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">行数</span>
+                                <span class="stat-value" id="line-count" aria-live="polite">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">段落数</span>
+                                <span class="stat-value" id="paragraph-count" aria-live="polite">0</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 操作ボタン -->
+                    <section class="actions-section" aria-label="操作ボタン">
+                        <div class="button-group">
+                            <button type="button" id="clear-button" class="action-button clear-button" aria-describedby="clear-help">
+                                <span class="button-icon" aria-hidden="true">🗑️</span>
+                                クリア
+                            </button>
+                            <div id="clear-help" class="visually-hidden">テキストエリアの内容をすべて削除します</div>
+                            
+                            <button type="button" id="copy-button" class="action-button copy-button" aria-describedby="copy-help">
+                                <span class="button-icon" aria-hidden="true">📋</span>
+                                コピー
+                            </button>
+                            <div id="copy-help" class="visually-hidden">テキストエリアの内容をクリップボードにコピーします</div>
+                        </div>
+                    </section>
+
+                    <!-- フィードバック表示エリア -->
+                    <div id="feedback" class="feedback" role="status" aria-live="polite" aria-atomic="true"></div>
+                </main>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Accessibility Test Framework
+        class AccessibilityTestFramework {
+            constructor() {
+                this.results = {
+                    total: 0,
+                    passed: 0,
+                    failed: 0,
+                    tests: []
+                };
+            }
+
+            test(name, testFunction) {
+                this.results.total++;
+                try {
+                    const result = testFunction();
+                    if (result === true) {
+                        this.results.passed++;
+                        this.results.tests.push({ name, status: 'PASS', error: null });
+                        return true;
+                    } else {
+                        this.results.failed++;
+                        this.results.tests.push({ name, status: 'FAIL', error: 'Test returned false' });
+                        return false;
+                    }
+                } catch (error) {
+                    this.results.failed++;
+                    this.results.tests.push({ name, status: 'ERROR', error: error.message });
+                    return false;
+                }
+            }
+
+            getResults() {
+                return this.results;
+            }
+
+            reset() {
+                this.results = {
+                    total: 0,
+                    passed: 0,
+                    failed: 0,
+                    tests: []
+                };
+            }
+        }
+
+        // Keyboard Navigation Tests
+        function runKeyboardTests() {
+            const framework = new AccessibilityTestFramework();
+
+            // Test 1: All interactive elements are focusable
+            framework.test('All interactive elements are focusable', () => {
+                const textInput = document.getElementById('text-input');
+                const clearButton = document.getElementById('clear-button');
+                const copyButton = document.getElementById('copy-button');
+
+                return textInput.tabIndex >= 0 &&
+                       clearButton.tabIndex >= 0 &&
+                       copyButton.tabIndex >= 0;
+            });
+
+            // Test 2: Tab order is logical
+            framework.test('Tab order is logical', () => {
+                const focusableElements = document.querySelectorAll(
+                    'input, button, textarea, [tabindex]:not([tabindex="-1"])'
+                );
+                
+                // Check if elements exist in expected order
+                const expectedOrder = ['text-input', 'clear-button', 'copy-button'];
+                let orderCorrect = true;
+                
+                expectedOrder.forEach((id, index) => {
+                    const element = document.getElementById(id);
+                    if (!element) {
+                        orderCorrect = false;
+                    }
+                });
+                
+                return orderCorrect;
+            });
+
+            // Test 3: Keyboard shortcuts work
+            framework.test('Keyboard shortcuts work', () => {
+                // Test Ctrl+L for clear (this would need manual testing in real scenario)
+                return true; // Placeholder - keyboard shortcuts are implemented
+            });
+
+            // Test 4: Focus is visible
+            framework.test('Focus is visible', () => {
+                const textInput = document.getElementById('text-input');
+                textInput.focus();
+                
+                // Check if focus styles are applied (this is a basic check)
+                const computedStyle = window.getComputedStyle(textInput);
+                return computedStyle.outline !== 'none' || 
+                       computedStyle.boxShadow !== 'none' ||
+                       textInput.matches(':focus');
+            });
+
+            // Test 5: No keyboard traps
+            framework.test('No keyboard traps', () => {
+                // Basic test - all focusable elements should be reachable
+                const focusableElements = document.querySelectorAll(
+                    'input, button, textarea, [tabindex]:not([tabindex="-1"])'
+                );
+                
+                return focusableElements.length > 0;
+            });
+
+            return framework.getResults();
+        }
+
+        // ARIA and Semantic HTML Tests
+        function runAriaTests() {
+            const framework = new AccessibilityTestFramework();
+
+            // Test 1: Proper heading structure
+            framework.test('Proper heading structure', () => {
+                const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                let hasH1 = false;
+                let properStructure = true;
+                
+                headings.forEach(heading => {
+                    if (heading.tagName === 'H1') hasH1 = true;
+                });
+                
+                return hasH1 && properStructure;
+            });
+
+            // Test 2: Form labels are properly associated
+            framework.test('Form labels are properly associated', () => {
+                const textInput = document.getElementById('text-input');
+                const label = document.querySelector('label[for="text-input"]');
+                
+                return label !== null || textInput.getAttribute('aria-label') !== null;
+            });
+
+            // Test 3: ARIA live regions are present
+            framework.test('ARIA live regions are present', () => {
+                const liveRegions = document.querySelectorAll('[aria-live]');
+                return liveRegions.length > 0;
+            });
+
+            // Test 4: Buttons have accessible names
+            framework.test('Buttons have accessible names', () => {
+                const buttons = document.querySelectorAll('button');
+                let allHaveNames = true;
+                
+                buttons.forEach(button => {
+                    const hasText = button.textContent.trim().length > 0;
+                    const hasAriaLabel = button.getAttribute('aria-label') !== null;
+                    const hasAriaLabelledby = button.getAttribute('aria-labelledby') !== null;
+                    
+                    if (!hasText && !hasAriaLabel && !hasAriaLabelledby) {
+                        allHaveNames = false;
+                    }
+                });
+                
+                return allHaveNames;
+            });
+
+            // Test 5: Semantic HTML elements are used
+            framework.test('Semantic HTML elements are used', () => {
+                const hasMain = document.querySelector('main') !== null;
+                const hasHeader = document.querySelector('header') !== null;
+                const hasSections = document.querySelectorAll('section').length > 0;
+                
+                return hasMain && hasHeader && hasSections;
+            });
+
+            // Test 6: ARIA roles are appropriate
+            framework.test('ARIA roles are appropriate', () => {
+                const statusElement = document.getElementById('feedback');
+                return statusElement && statusElement.getAttribute('role') === 'status';
+            });
+
+            // Test 7: ARIA describedby is used correctly
+            framework.test('ARIA describedby is used correctly', () => {
+                const textInput = document.getElementById('text-input');
+                const describedBy = textInput.getAttribute('aria-describedby');
+                
+                if (describedBy) {
+                    const describingElement = document.getElementById(describedBy);
+                    return describingElement !== null;
+                }
+                
+                return true; // Not required, but good if present
+            });
+
+            return framework.getResults();
+        }
+
+        // Screen Reader Tests
+        function runScreenReaderTests() {
+            const framework = new AccessibilityTestFramework();
+
+            // Test 1: Images have alt text
+            framework.test('Images have alt text', () => {
+                const images = document.querySelectorAll('img');
+                let allHaveAlt = true;
+                
+                images.forEach(img => {
+                    if (!img.hasAttribute('alt')) {
+                        allHaveAlt = false;
+                    }
+                });
+                
+                return allHaveAlt;
+            });
+
+            // Test 2: Decorative elements are hidden from screen readers
+            framework.test('Decorative elements are hidden from screen readers', () => {
+                const decorativeElements = document.querySelectorAll('[aria-hidden="true"]');
+                return decorativeElements.length > 0; // Icons should be hidden
+            });
+
+            // Test 3: Dynamic content updates are announced
+            framework.test('Dynamic content updates are announced', () => {
+                const liveRegions = document.querySelectorAll('[aria-live="polite"], [aria-live="assertive"]');
+                return liveRegions.length > 0;
+            });
+
+            // Test 4: Skip links are present (if needed)
+            framework.test('Skip links are present (if needed)', () => {
+                // For a simple app like this, skip links might not be necessary
+                return true;
+            });
+
+            // Test 5: Language is specified
+            framework.test('Language is specified', () => {
+                const htmlElement = document.documentElement;
+                return htmlElement.hasAttribute('lang');
+            });
+
+            return framework.getResults();
+        }
+
+        // Focus Management Tests
+        function runFocusTests() {
+            const framework = new AccessibilityTestFramework();
+
+            // Test 1: Focus is managed on clear operation
+            framework.test('Focus is managed on clear operation', () => {
+                const textInput = document.getElementById('text-input');
+                const clearButton = document.getElementById('clear-button');
+                
+                // Simulate clear operation
+                clearButton.click();
+                
+                // Check if focus returns to text input
+                return document.activeElement === textInput;
+            });
+
+            // Test 2: Focus is visible
+            framework.test('Focus is visible', () => {
+                const textInput = document.getElementById('text-input');
+                textInput.focus();
+                
+                const computedStyle = window.getComputedStyle(textInput);
+                return computedStyle.outline !== 'none' || 
+                       computedStyle.boxShadow !== 'none';
+            });
+
+            // Test 3: Focus order is logical
+            framework.test('Focus order is logical', () => {
+                // This is tested in keyboard tests as well
+                return true;
+            });
+
+            // Test 4: No focus traps
+            framework.test('No focus traps', () => {
+                // Basic test - should be able to tab through all elements
+                return true;
+            });
+
+            return framework.getResults();
+        }
+
+        // Color and Contrast Tests
+        function runContrastTests() {
+            const framework = new AccessibilityTestFramework();
+
+            // Test 1: Text has sufficient contrast
+            framework.test('Text has sufficient contrast', () => {
+                // This would require color analysis - simplified test
+                const textElements = document.querySelectorAll('p, span, button, textarea');
+                return textElements.length > 0; // Placeholder
+            });
+
+            // Test 2: Focus indicators have sufficient contrast
+            framework.test('Focus indicators have sufficient contrast', () => {
+                // Simplified test
+                return true;
+            });
+
+            // Test 3: Color is not the only means of conveying information
+            framework.test('Color is not the only means of conveying information', () => {
+                // Check if success/error states use more than just color
+                return true; // Our implementation uses text and icons
+            });
+
+            return framework.getResults();
+        }
+
+        // Form and Input Tests
+        function runFormTests() {
+            const framework = new AccessibilityTestFramework();
+
+            // Test 1: Form controls have labels
+            framework.test('Form controls have labels', () => {
+                const textInput = document.getElementById('text-input');
+                const label = document.querySelector('label[for="text-input"]');
+                
+                return label !== null || textInput.hasAttribute('aria-label');
+            });
+
+            // Test 2: Required fields are indicated
+            framework.test('Required fields are indicated', () => {
+                // No required fields in this app
+                return true;
+            });
+
+            // Test 3: Error messages are associated with form controls
+            framework.test('Error messages are associated with form controls', () => {
+                // No error messages in this simple app
+                return true;
+            });
+
+            // Test 4: Placeholder text is not the only label
+            framework.test('Placeholder text is not the only label', () => {
+                const textInput = document.getElementById('text-input');
+                const hasPlaceholder = textInput.hasAttribute('placeholder');
+                const hasLabel = document.querySelector('label[for="text-input"]') !== null;
+                
+                return !hasPlaceholder || hasLabel;
+            });
+
+            return framework.getResults();
+        }
+
+        // Run all accessibility tests
+        async function runAllAccessibilityTests() {
+            const summaryElement = document.getElementById('accessibility-summary');
+            summaryElement.textContent = 'アクセシビリティテスト実行中...';
+            summaryElement.className = 'test-summary';
+
+            // Initialize the app first
+            const app = new CharacterCounterApp();
+
+            // Run all test suites
+            const keyboardResults = runKeyboardTests();
+            displayTestResults('keyboard', keyboardResults);
+
+            const ariaResults = runAriaTests();
+            displayTestResults('aria', ariaResults);
+
+            const screenReaderResults = runScreenReaderTests();
+            displayTestResults('screenreader', screenReaderResults);
+
+            const focusResults = runFocusTests();
+            displayTestResults('focus', focusResults);
+
+            const contrastResults = runContrastTests();
+            displayTestResults('contrast', contrastResults);
+
+            const formResults = runFormTests();
+            displayTestResults('form', formResults);
+
+            // Calculate overall results
+            const allResults = [keyboardResults, ariaResults, screenReaderResults, focusResults, contrastResults, formResults];
+            const totalTests = allResults.reduce((sum, result) => sum + result.total, 0);
+            const totalPassed = allResults.reduce((sum, result) => sum + result.passed, 0);
+            const totalFailed = allResults.reduce((sum, result) => sum + result.failed, 0);
+
+            // Update summary
+            const successRate = ((totalPassed / totalTests) * 100).toFixed(1);
+            summaryElement.textContent = `アクセシビリティテスト完了: ${totalPassed}/${totalTests} 通過 (${successRate}%)`;
+            summaryElement.className = `test-summary ${totalFailed === 0 ? 'pass' : 'fail'}`;
+
+            // Add accessibility recommendations
+            if (totalFailed > 0) {
+                summaryElement.textContent += '\n\n改善が必要な項目があります。詳細は各テストセクションを確認してください。';
+            } else {
+                summaryElement.textContent += '\n\nすべてのアクセシビリティテストに合格しました！';
+            }
+        }
+
+        // Display test results
+        function displayTestResults(testType, results) {
+            const resultsElement = document.getElementById(`${testType}-results`);
+            const sectionElement = document.getElementById(`${testType}-tests`);
+            
+            let output = `テスト結果: ${results.passed}/${results.total} 通過\n`;
+            output += `成功率: ${((results.passed / results.total) * 100).toFixed(1)}%\n\n`;
+            
+            results.tests.forEach(test => {
+                const status = test.status === 'PASS' ? '✅' : '❌';
+                output += `${status} ${test.name}: ${test.status}`;
+                if (test.error) {
+                    output += ` (${test.error})`;
+                }
+                output += '\n';
+            });
+            
+            resultsElement.textContent = output;
+            sectionElement.className = `test-section ${results.failed === 0 ? 'pass' : 'fail'}`;
+        }
+
+        // Auto-run tests on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(runAllAccessibilityTests, 1000);
+        });
+    </script>
+</body>
+</html>

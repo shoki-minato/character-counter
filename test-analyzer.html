@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TextAnalyzer Test</title>
+</head>
+<body>
+    <h1>TextAnalyzer Test</h1>
+    <div id="test-results"></div>
+
+    <script src="script.js"></script>
+    <script>
+        // Test the TextAnalyzer implementation
+        const analyzer = new TextAnalyzer();
+        const resultsDiv = document.getElementById('test-results');
+
+        function runTests() {
+            const tests = [
+                {
+                    name: "Empty text test (Requirement 1.3)",
+                    input: "",
+                    expected: {
+                        charactersWithSpaces: 0,
+                        charactersWithoutSpaces: 0,
+                        words: 0,
+                        lines: 0,
+                        paragraphs: 0
+                    }
+                },
+                {
+                    name: "Simple text test",
+                    input: "Hello world",
+                    expected: {
+                        charactersWithSpaces: 11,
+                        charactersWithoutSpaces: 10,
+                        words: 2,
+                        lines: 1,
+                        paragraphs: 1
+                    }
+                },
+                {
+                    name: "Multi-line text test",
+                    input: "Line 1\nLine 2\nLine 3",
+                    expected: {
+                        charactersWithSpaces: 18,
+                        charactersWithoutSpaces: 16,
+                        words: 6,
+                        lines: 3,
+                        paragraphs: 1
+                    }
+                },
+                {
+                    name: "Multi-paragraph text test",
+                    input: "Paragraph 1\n\nParagraph 2\n\nParagraph 3",
+                    expected: {
+                        charactersWithSpaces: 35,
+                        charactersWithoutSpaces: 29,
+                        words: 6,
+                        lines: 5,
+                        paragraphs: 3
+                    }
+                }
+            ];
+
+            let allPassed = true;
+            let output = '<h2>Test Results:</h2>';
+
+            tests.forEach(test => {
+                const result = analyzer.analyze(test.input);
+                const passed = JSON.stringify(result) === JSON.stringify(test.expected);
+                allPassed = allPassed && passed;
+
+                output += `<div style="margin: 10px 0; padding: 10px; border: 1px solid ${passed ? 'green' : 'red'};">`;
+                output += `<h3>${test.name}: ${passed ? 'PASS' : 'FAIL'}</h3>`;
+                output += `<p><strong>Input:</strong> "${test.input}"</p>`;
+                output += `<p><strong>Expected:</strong> ${JSON.stringify(test.expected)}</p>`;
+                output += `<p><strong>Actual:</strong> ${JSON.stringify(result)}</p>`;
+                output += '</div>';
+            });
+
+            output += `<h2>Overall Result: ${allPassed ? 'ALL TESTS PASSED' : 'SOME TESTS FAILED'}</h2>`;
+            resultsDiv.innerHTML = output;
+        }
+
+        // Run tests when page loads
+        runTests();
+    </script>
+</body>
+</html>

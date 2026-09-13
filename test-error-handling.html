@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>エラーハンドリングテスト - 文字数カウンター</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .test-button {
+            margin: 5px;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background-color: #0056b3;
+        }
+        .test-button.danger {
+            background-color: #dc3545;
+        }
+        .test-button.danger:hover {
+            background-color: #c82333;
+        }
+        .test-results {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1>エラーハンドリングテスト</h1>
+            <p class="app-description">ErrorHandlerクラスの機能をテストします</p>
+        </header>
+
+        <main class="app-main">
+            <!-- テキスト入力エリア -->
+            <section class="input-section">
+                <label for="text-input" class="visually-hidden">テスト用テキスト入力エリア</label>
+                <textarea 
+                    id="text-input" 
+                    class="text-input" 
+                    placeholder="エラーハンドリングをテストするためのテキストを入力してください..."
+                    rows="6"
+                >テストテキスト - クリップボードエラーのテストに使用</textarea>
+            </section>
+
+            <!-- 統計表示パネル -->
+            <section class="stats-section" aria-label="テキスト統計情報">
+                <h2 class="stats-title">統計情報</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">文字数（スペース含む）</span>
+                        <span class="stat-value" id="chars-with-spaces" aria-live="polite">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">文字数（スペース除く）</span>
+                        <span class="stat-value" id="chars-without-spaces" aria-live="polite">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">単語数</span>
+                        <span class="stat-value" id="word-count" aria-live="polite">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">行数</span>
+                        <span class="stat-value" id="line-count" aria-live="polite">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">段落数</span>
+                        <span class="stat-value" id="paragraph-count" aria-live="polite">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 通常の操作ボタン -->
+            <section class="actions-section" aria-label="操作ボタン">
+                <div class="button-group">
+                    <button type="button" id="clear-button" class="action-button clear-button">
+                        <span class="button-icon" aria-hidden="true">🗑️</span>
+                        クリア
+                    </button>
+                    
+                    <button type="button" id="copy-button" class="action-button copy-button">
+                        <span class="button-icon" aria-hidden="true">📋</span>
+                        コピー
+                    </button>
+                </div>
+            </section>
+
+            <!-- エラーハンドリングテストセクション -->
+            <section class="test-section">
+                <h3>クリップボードエラーテスト</h3>
+                <p>クリップボード関連のエラーハンドリングをテストします</p>
+                <button class="test-button" onclick="testClipboardPermissionError()">権限エラーをシミュレート</button>
+                <button class="test-button" onclick="testClipboardNotSupportedError()">非サポートエラーをシミュレート</button>
+                <button class="test-button" onclick="testClipboardSecurityError()">セキュリティエラーをシミュレート</button>
+                <button class="test-button" onclick="testClipboardGeneralError()">一般的なエラーをシミュレート</button>
+                <div id="clipboard-test-results" class="test-results"></div>
+            </section>
+
+            <section class="test-section">
+                <h3>ストレージエラーテスト</h3>
+                <p>ローカルストレージ関連のエラーハンドリングをテストします</p>
+                <button class="test-button" onclick="testStorageQuotaError()">容量不足エラーをシミュレート</button>
+                <button class="test-button" onclick="testStorageSecurityError()">セキュリティエラーをシミュレート</button>
+                <button class="test-button" onclick="testStorageGeneralError()">一般的なエラーをシミュレート</button>
+                <div id="storage-test-results" class="test-results"></div>
+            </section>
+
+            <section class="test-section">
+                <h3>Service Workerエラーテスト</h3>
+                <p>Service Worker関連のエラーハンドリングをテストします</p>
+                <button class="test-button" onclick="testServiceWorkerError()">Service Workerエラーをシミュレート</button>
+                <div id="sw-test-results" class="test-results"></div>
+            </section>
+
+            <section class="test-section">
+                <h3>一般的なエラーテスト</h3>
+                <p>一般的なアプリケーションエラーをテストします</p>
+                <button class="test-button danger" onclick="testGeneralError()">一般的なエラーをシミュレート</button>
+                <button class="test-button danger" onclick="testUnhandledPromiseRejection()">未処理のPromise拒否をシミュレート</button>
+                <div id="general-test-results" class="test-results"></div>
+            </section>
+
+            <section class="test-section">
+                <h3>Graceful Degradationテスト</h3>
+                <p>機能の段階的劣化をテストします</p>
+                <button class="test-button" onclick="testClipboardDegradation()">クリップボード機能の劣化</button>
+                <button class="test-button" onclick="testStorageDegradation()">ストレージ機能の劣化</button>
+                <button class="test-button" onclick="testServiceWorkerDegradation()">Service Worker機能の劣化</button>
+                <div id="degradation-test-results" class="test-results"></div>
+            </section>
+
+            <section class="test-section">
+                <h3>ブラウザ機能チェック</h3>
+                <p>現在のブラウザの機能をチェックします</p>
+                <button class="test-button" onclick="checkBrowserCapabilities()">機能チェック実行</button>
+                <div id="capabilities-test-results" class="test-results"></div>
+            </section>
+
+            <section class="test-section">
+                <h3>統合テスト</h3>
+                <p>ErrorHandlerクラスの統合テストを実行します</p>
+                <button class="test-button" onclick="runIntegrationTests()">統合テスト実行</button>
+                <div id="integration-test-results" class="test-results"></div>
+            </section>
+
+            <!-- フィードバック表示エリア -->
+            <div id="feedback" class="feedback" role="status" aria-live="polite" aria-atomic="true"></div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="test-integration.js"></script>
+    <script>
+        // テスト用のグローバル変数
+        let app;
+
+        // アプリケーション初期化後にテスト関数を設定
+        document.addEventListener('DOMContentLoaded', () => {
+            // アプリケーションインスタンスを取得（グローバルスコープに追加）
+            setTimeout(() => {
+                app = window.characterCounterApp || new CharacterCounterApp();
+                window.characterCounterApp = app;
+            }, 100);
+        });
+
+        // クリップボードエラーテスト関数
+        function testClipboardPermissionError() {
+            if (!app) return;
+            const error = new Error('Permission denied');
+            error.name = 'NotAllowedError';
+            const result = app.errorHandler.handleClipboardError(error, app.uiController);
+            document.getElementById('clipboard-test-results').textContent = JSON.stringify(result, null, 2);
+        }
+
+        function testClipboardNotSupportedError() {
+            if (!app) return;
+            const error = new Error('Not supported');
+            error.name = 'NotSupportedError';
+            const result = app.errorHandler.handleClipboardError(error, app.uiController);
+            document.getElementById('clipboard-test-results').textContent = JSON.stringify(result, null, 2);
+        }
+
+        function testClipboardSecurityError() {
+            if (!app) return;
+            const error = new Error('Security error');
+            error.name = 'SecurityError';
+            const result = app.errorHandler.handleClipboardError(error, app.uiController);
+            document.getElementById('clipboard-test-results').textContent = JSON.stringify(result, null, 2);
+        }
+
+        function testClipboardGeneralError() {
+            if (!app) return;
+            const error = new Error('General clipboard error');
+            const result = app.errorHandler.handleClipboardError(error, app.uiController);
+            document.getElementById('clipboard-test-results').textContent = JSON.stringify(result, null, 2);
+        }
+
+        // ストレージエラーテスト関数
+        function testStorageQuotaError() {
+            if (!app) return;
+            const error = new Error('Quota exceeded');
+            error.name = 'QuotaExceededError';
+            const result = app.errorHandler.handleStorageError(error, app.uiController);
+            document.getElementById('storage-test-results').textContent = JSON.stringify(result, null, 2);
+        }
+
+        function testStorageSecurityError() {
+            if (!app) return;
+            const error = new Error('Storage security error');
+            error.name = 'SecurityError';
+            const result = app.errorHandler.handleStorageError(error, app.uiController);
+            document.getElementById('storage-test-results').textContent = JSON.stringify(result, null, 2);
+        }
+
+        function testStorageGeneralError() {
+            if (!app) return;
+            const error = new Error('General storage error');
+            const result = app.errorHandler.handleStorageError(error, app.uiController);
+            document.getElementById('storage-test-results').textContent = JSON.stringify(result, null, 2);
+        }
+
+        // Service Workerエラーテスト関数
+        function testServiceWorkerError() {
+            if (!app) return;
+            const error = new Error('Service Worker registration failed');
+            const result = app.errorHandler.handleServiceWorkerError(error, app.uiController);
+            document.getElementById('sw-test-results').textContent = JSON.stringify(result, null, 2);
+        }
+
+        // 一般的なエラーテスト関数
+        function testGeneralError() {
+            if (!app) return;
+            const error = new Error('Test general error');
+            const result = app.errorHandler.handleGeneralError(error, 'テスト実行', app.uiController);
+            document.getElementById('general-test-results').textContent = JSON.stringify(result, null, 2);
+        }
+
+        function testUnhandledPromiseRejection() {
+            // 未処理のPromise拒否を発生させる
+            Promise.reject(new Error('Test unhandled promise rejection'));
+            document.getElementById('general-test-results').textContent = 'Unhandled promise rejection triggered - check console and feedback area';
+        }
+
+        // Graceful Degradationテスト関数
+        function testClipboardDegradation() {
+            if (!app) return;
+            const result = app.errorHandler.implementGracefulDegradation('clipboard', {
+                data: 'テストテキスト',
+                element: document.getElementById('text-input')
+            });
+            document.getElementById('degradation-test-results').textContent = JSON.stringify(result, null, 2);
+        }
+
+        function testStorageDegradation() {
+            if (!app) return;
+            const result = app.errorHandler.implementGracefulDegradation('storage', {
+                data: 'テストデータ'
+            });
+            document.getElementById('degradation-test-results').textContent = JSON.stringify(result, null, 2);
+        }
+
+        function testServiceWorkerDegradation() {
+            if (!app) return;
+            const result = app.errorHandler.implementGracefulDegradation('serviceWorker');
+            document.getElementById('degradation-test-results').textContent = JSON.stringify(result, null, 2);
+        }
+
+        // ブラウザ機能チェック関数
+        function checkBrowserCapabilities() {
+            if (!app) return;
+            const result = app.errorHandler.checkBrowserCapabilities(app.uiController);
+            document.getElementById('capabilities-test-results').textContent = JSON.stringify(result, null, 2);
+        }
+
+        // 統合テスト実行関数
+        function runIntegrationTests() {
+            const resultsElement = document.getElementById('integration-test-results');
+            resultsElement.textContent = 'テスト実行中... (コンソールを確認してください)';
+            
+            // コンソール出力をキャプチャ
+            const originalLog = console.log;
+            let logOutput = '';
+            console.log = function(...args) {
+                logOutput += args.join(' ') + '\n';
+                originalLog.apply(console, args);
+            };
+
+            try {
+                const results = runErrorHandlerTests();
+                console.log = originalLog; // コンソールを復元
+                
+                resultsElement.textContent = `統合テスト完了\n\n` +
+                    `結果: ${results.passed}/${results.passed + results.failed} テスト通過\n` +
+                    `成功率: ${((results.passed / (results.passed + results.failed)) * 100).toFixed(1)}%\n\n` +
+                    `詳細はコンソールを確認してください。\n\n` +
+                    `ログ出力:\n${logOutput}`;
+            } catch (error) {
+                console.log = originalLog; // コンソールを復元
+                resultsElement.textContent = `テスト実行エラー: ${error.message}\n\nログ出力:\n${logOutput}`;
+            }
+        }
+    </script>
+</body>
+</html>

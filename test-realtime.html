@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Update Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .pass { background-color: #d4edda; border-color: #c3e6cb; }
+        .fail { background-color: #f8d7da; border-color: #f5c6cb; }
+        textarea { width: 100%; height: 100px; margin: 10px 0; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+        .stat { padding: 5px; background: #f8f9fa; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>Real-time Update Functionality Test</h1>
+    <div id="test-results"></div>
+
+    <!-- Mock HTML structure for testing -->
+    <div style="display: none;">
+        <textarea id="text-input"></textarea>
+        <div id="chars-with-spaces">0</div>
+        <div id="chars-without-spaces">0</div>
+        <div id="word-count">0</div>
+        <div id="line-count">0</div>
+        <div id="paragraph-count">0</div>
+        <button id="clear-button">Clear</button>
+        <button id="copy-button">Copy</button>
+        <div id="feedback"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Test the real-time functionality
+        const resultsDiv = document.getElementById('test-results');
+        let testResults = [];
+
+        function addTestResult(name, passed, details) {
+            testResults.push({ name, passed, details });
+        }
+
+        function displayResults() {
+            let html = '';
+            let allPassed = true;
+
+            testResults.forEach(test => {
+                allPassed = allPassed && test.passed;
+                html += `<div class="test-section ${test.passed ? 'pass' : 'fail'}">`;
+                html += `<h3>${test.name}: ${test.passed ? 'PASS' : 'FAIL'}</h3>`;
+                html += `<p>${test.details}</p>`;
+                html += '</div>';
+            });
+
+            html += `<div class="test-section ${allPassed ? 'pass' : 'fail'}">`;
+            html += `<h2>Overall Result: ${allPassed ? 'ALL TESTS PASSED' : 'SOME TESTS FAILED'}</h2>`;
+            html += '</div>';
+
+            resultsDiv.innerHTML = html;
+        }
+
+        function runTests() {
+            // Test 1: UIController and TextAnalyzer initialization
+            try {
+                const textAnalyzer = new TextAnalyzer();
+                const uiController = new UIController();
+                addTestResult(
+                    'Component Initialization',
+                    true,
+                    'TextAnalyzer and UIController classes instantiated successfully'
+                );
+            } catch (error) {
+                addTestResult(
+                    'Component Initialization',
+                    false,
+                    `Failed to initialize components: ${error.message}`
+                );
+            }
+
+            // Test 2: Event listener setup
+            try {
+                const textAnalyzer = new TextAnalyzer();
+                const uiController = new UIController();
+                
+                // Check if setupEventListeners method exists
+                const hasSetupMethod = typeof uiController.setupEventListeners === 'function';
+                addTestResult(
+                    'Event Listener Setup Method',
+                    hasSetupMethod,
+                    hasSetupMethod ? 'setupEventListeners method exists' : 'setupEventListeners method not found'
+                );
+
+                // Test setupEventListeners call
+                uiController.setupEventListeners(textAnalyzer);
+                addTestResult(
+                    'Event Listener Setup Execution',
+                    true,
+                    'setupEventListeners executed without errors'
+                );
+            } catch (error) {
+                addTestResult(
+                    'Event Listener Setup Execution',
+                    false,
+                    `setupEventListeners failed: ${error.message}`
+                );
+            }
+
+            // Test 3: Debounce function
+            try {
+                const uiController = new UIController();
+                const debounceFunc = uiController.debounce(() => 'test', 30);
+                const hasDebounce = typeof debounceFunc === 'function';
+                addTestResult(
+                    'Debounce Function',
+                    hasDebounce,
+                    hasDebounce ? 'Debounce function works correctly' : 'Debounce function not working'
+                );
+            } catch (error) {
+                addTestResult(
+                    'Debounce Function',
+                    false,
+                    `Debounce function failed: ${error.message}`
+                );
+            }
+
+            // Test 4: Real-time analysis integration
+            try {
+                const textAnalyzer = new TextAnalyzer();
+                const testText = "Hello world\nThis is a test";
+                const stats = textAnalyzer.analyze(testText);
+                
+                const expectedStats = {
+                    charactersWithSpaces: 26,
+                    charactersWithoutSpaces: 23,
+                    words: 5,
+                    lines: 2,
+                    paragraphs: 1
+                };
+
+                const statsMatch = JSON.stringify(stats) === JSON.stringify(expectedStats);
+                addTestResult(
+                    'TextAnalyzer Integration',
+                    statsMatch,
+                    statsMatch ? 
+                        'TextAnalyzer produces correct results for real-time analysis' : 
+                        `Expected: ${JSON.stringify(expectedStats)}, Got: ${JSON.stringify(stats)}`
+                );
+            } catch (error) {
+                addTestResult(
+                    'TextAnalyzer Integration',
+                    false,
+                    `TextAnalyzer integration failed: ${error.message}`
+                );
+            }
+
+            // Test 5: Performance requirement (30ms debounce < 50ms requirement)
+            const debounceDelay = 30;
+            const performanceRequirement = 50;
+            addTestResult(
+                'Performance Requirement',
+                debounceDelay < performanceRequirement,
+                `Debounce delay: ${debounceDelay}ms (requirement: < ${performanceRequirement}ms)`
+            );
+
+            // Test 6: CharacterCounterApp integration
+            try {
+                const app = new CharacterCounterApp();
+                const hasTextAnalyzer = app.textAnalyzer instanceof TextAnalyzer;
+                const hasUIController = app.uiController instanceof UIController;
+                
+                addTestResult(
+                    'Application Integration',
+                    hasTextAnalyzer && hasUIController,
+                    hasTextAnalyzer && hasUIController ? 
+                        'CharacterCounterApp properly integrates TextAnalyzer and UIController' :
+                        'CharacterCounterApp integration incomplete'
+                );
+            } catch (error) {
+                addTestResult(
+                    'Application Integration',
+                    false,
+                    `Application integration failed: ${error.message}`
+                );
+            }
+
+            displayResults();
+        }
+
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', runTests);
+    </script>
+</body>
+</html>

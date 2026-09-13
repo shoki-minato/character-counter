@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clipboard Test - Character Counter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Clipboard Functionality Test</h1>
+        
+        <div class="input-section">
+            <label for="text-input">テキストを入力してください:</label>
+            <textarea id="text-input" placeholder="ここにテキストを入力...">これはクリップボードのテストです。
+複数行のテキストも
+正しくコピーされるかテストします。</textarea>
+        </div>
+
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">文字数（スペース含む）:</span>
+                    <span id="chars-with-spaces" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">文字数（スペース除く）:</span>
+                    <span id="chars-without-spaces" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">単語数:</span>
+                    <span id="word-count" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">行数:</span>
+                    <span id="line-count" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">段落数:</span>
+                    <span id="paragraph-count" class="stat-value">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions-section">
+            <button id="clear-button" class="action-button clear-button">クリア</button>
+            <button id="copy-button" class="action-button copy-button">コピー</button>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+
+        <div class="test-info">
+            <h3>Clipboard Test Information:</h3>
+            <div id="clipboard-info"></div>
+            
+            <h3>Test Instructions:</h3>
+            <ol>
+                <li>Enter some text in the textarea above</li>
+                <li>Click the "コピー" (Copy) button</li>
+                <li>Observe the visual feedback:
+                    <ul>
+                        <li>Button should show "コピー中..." while processing</li>
+                        <li>Button should show "✓ コピー完了" on success</li>
+                        <li>Feedback message should appear with animation</li>
+                    </ul>
+                </li>
+                <li>Try pasting the text elsewhere to verify it was copied</li>
+                <li>Test with empty textarea to see warning feedback</li>
+            </ol>
+        </div>
+    </div>
+
+    <style>
+        .test-info {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+        }
+        .test-info h3 {
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+        .test-info ol, .test-info ul {
+            margin-left: 1.5rem;
+        }
+        .test-info li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+
+    <script src="script.js"></script>
+    <script>
+        // Additional test functionality to display clipboard capabilities
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new CharacterCounterApp();
+            const clipboardInfo = document.getElementById('clipboard-info');
+            
+            if (clipboardInfo && app.clipboardManager) {
+                const capabilities = app.clipboardManager.getCapabilities();
+                clipboardInfo.innerHTML = `
+                    <p><strong>Clipboard API Supported:</strong> ${capabilities.clipboardAPISupported ? 'Yes' : 'No'}</p>
+                    <p><strong>Secure Context:</strong> ${capabilities.secureContext ? 'Yes' : 'No'}</p>
+                    <p><strong>Fallback Available:</strong> ${capabilities.fallbackAvailable ? 'Yes' : 'No'}</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
